@@ -1,10 +1,77 @@
 # MailCatcher
 
-Catches mail and serves it through a dream.
+A little gem allowing safe email testing.
 
-MailCatcher runs a super simple SMTP server which catches any message sent to it to display in a web interface. Run mailcatcher, set your favourite app to deliver to smtp://127.0.0.1:1025 instead of your default SMTP server, then check out http://127.0.0.1:1080 to see the mail that's arrived so far.
+Simply:
+* point your mail settings to `127.0.0.1:1025`;
+* start `mailcatcher`; and
+* open your web-brower to: `http://127.0.0.1:1080` to see the emails.
 
-![MailCatcher screenshot](https://cloud.githubusercontent.com/assets/14028/14093249/4100f904-f598-11e5-936b-e6a396f18e39.png)
+View the original source from [the GitHub repository][mailcatcher-github].
+
+## USAGE
+
+### using a System Gem
+
+1. `gem install mailcatcher`
+2. `mailcatcher`
+3. Go to http://127.0.0.1:1080/
+4. Send mail through smtp://127.0.0.1:1025
+
+Use `mailcatcher --help` to see the command line options.
+
+**NOTE with RVM**
+
+Under RVM your mailcatcher command may only be available under the ruby you install mailcatcher into. To prevent this, and to prevent gem conflicts, install mailcatcher into a dedicated gemset with a wrapper script:
+
+    rvm default@mailcatcher --create do gem install mailcatcher
+    ln -s "$(rvm default@mailcatcher do rvm wrapper show mailcatcher)" "$rvm_bin_path/"
+
+### using Docker
+
+If you are having problems or conflicts Docker is a good solution.
+
+**ONE TIME SETUP**
+
+Once docker is installed you can setup (once your mailcatcher container) with:
+
+```
+git clone https://github.com/garaio/mailcatcher.git
+cd mailcather
+docker build -t garaio/mailcatcher:latest .
+docker run -d -p 1025:1025 -p 1080:1080 --name mailcatcher garaio/mailcatcher:latest
+docker kill mailcatcher
+```
+
+**Start MailCatcher**
+
+Whenever you want to tests emails simply type:
+
+```
+docker start mailcatcher
+```
+
+**Stop MailCatcher**
+
+and when done you can stop mailcatcher with:
+```
+docker kill mailcatcher
+```
+
+### Bundler -- DON'T (not Rails 5+ compatible)!!
+
+**Please don't put mailcatcher into your Gemfile. It will conflict with your applications gems (for example: Rails 5+) -- mailcather depends on older versions of `rack`, `sinatra` and `eventmachine`.**
+
+Instead, pop a note in your README stating you use mailcatcher, and to run `gem install mailcatcher` then `mailcatcher` to get started.
+
+
+### Rails Config
+
+To set up your rails app, I recommend adding this to your `environments/development.rb`:
+
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.smtp_settings = { :address => '127.0.0.1', :port => 1025 }
+    config.action_mailer.raise_delivery_errors = false
 
 ## Features
 
@@ -19,35 +86,6 @@ MailCatcher runs a super simple SMTP server which catches any message sent to it
 * Sendmail-analogue command, `catchmail`, makes using mailcatcher from PHP a lot easier.
 * Keyboard navigation between messages
 
-## How
-
-1. `gem install mailcatcher`
-2. `mailcatcher`
-3. Go to http://127.0.0.1:1080/
-4. Send mail through smtp://127.0.0.1:1025
-
-Use `mailcatcher --help` to see the command line options. The brave can get the source from [the GitHub repository][mailcatcher-github].
-
-### Bundler
-
-Please don't put mailcatcher into your Gemfile. It will conflict with your applications gems at some point.
-
-Instead, pop a note in your README stating you use mailcatcher, and to run `gem install mailcatcher` then `mailcatcher` to get started.
-
-### RVM
-
-Under RVM your mailcatcher command may only be available under the ruby you install mailcatcher into. To prevent this, and to prevent gem conflicts, install mailcatcher into a dedicated gemset with a wrapper script:
-
-    rvm default@mailcatcher --create do gem install mailcatcher
-    ln -s "$(rvm default@mailcatcher do rvm wrapper show mailcatcher)" "$rvm_bin_path/"
-
-### Rails
-
-To set up your rails app, I recommend adding this to your `environments/development.rb`:
-
-    config.action_mailer.delivery_method = :smtp
-    config.action_mailer.smtp_settings = { :address => '127.0.0.1', :port => 1025 }
-    config.action_mailer.raise_delivery_errors = false
 
 ### PHP
 
